@@ -3,14 +3,14 @@ import streamlit as st
 from openai import OpenAI
 import os
 
-st.title("SmartCare Scheduler – AI Chatbot + Booking")
 
+st.title("SmartCare Scheduler – AI Chatbot + Booking")
 st.write("👩‍⚕️ Hello! I'm your AI assistant. I can help you book a hospital appointment.")
 
 openai_api_key = st.text_input("Enter your OpenAI API key", type="password")
 
 if openai_api_key:
-    client = OpenAI()
+    client = OpenAI(api_key=openai_api_key)
 
     user_prompt = st.text_area("Ask a question about your hospital visit or scheduling...")
 
@@ -19,17 +19,18 @@ if openai_api_key:
             with st.spinner("Thinking..."):
                 try:
                     response = client.chat.completions.create(
-    model="gpt-3.5-turbo",
-    messages=[
-        {"role": "system", "content": "You are a helpful healthcare assistant scheduling appointments."},
-        {"role": "user", "content": user_prompt}
-    ],
-    max_tokens=150
-)
-                    reply = response['choices'][0]['message']['content']
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful healthcare assistant scheduling appointments."},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        max_tokens=150
+                    )
+                    reply = response.choices[0].message.content
                     st.success(reply)
                 except Exception as e:
                     st.error(f"API error: {str(e)}")
+
 
 # Booking interface
 st.header("Schedule Your Appointment")
