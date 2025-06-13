@@ -1,6 +1,6 @@
 
 import streamlit as st
-import openai
+from openai import OpenAI
 import os
 
 st.title("SmartCare Scheduler – AI Chatbot + Booking")
@@ -10,7 +10,7 @@ st.write("👩‍⚕️ Hello! I'm your AI assistant. I can help you book a hosp
 openai_api_key = st.text_input("Enter your OpenAI API key", type="password")
 
 if openai_api_key:
-    openai.api_key = openai_api_key
+    client = OpenAI()
 
     user_prompt = st.text_area("Ask a question about your hospital visit or scheduling...")
 
@@ -18,14 +18,14 @@ if openai_api_key:
         if user_prompt:
             with st.spinner("Thinking..."):
                 try:
-                    response = openai.ChatCompletion.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
-                            {"role": "system", "content": "You are a helpful healthcare assistant scheduling appointments."},
-                            {"role": "user", "content": user_prompt}
-                        ],
-                        max_tokens=150
-                    )
+                    response = client.chat.completions.create(
+    model="gpt-3.5-turbo",
+    messages=[
+        {"role": "system", "content": "You are a helpful healthcare assistant scheduling appointments."},
+        {"role": "user", "content": user_prompt}
+    ],
+    max_tokens=150
+)
                     reply = response['choices'][0]['message']['content']
                     st.success(reply)
                 except Exception as e:
@@ -33,6 +33,8 @@ if openai_api_key:
 
 # Booking interface
 st.header("Schedule Your Appointment")
+language = st.selectbox("Choose your language:", ["English", "Spanish", "Finnish"])
+appt_type = st.selectbox("Type of Appointment:", ["General consultation", "Follow-up", "Vaccination"])
 preferred_day = st.selectbox("Preferred Day:", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
 preferred_time = st.radio("Preferred Time:", ["Morning", "Afternoon"])
 
