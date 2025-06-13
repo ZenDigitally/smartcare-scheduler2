@@ -1,11 +1,38 @@
 
 import streamlit as st
+import openai
+import os
 
-st.title("SmartCare Scheduler – Chatbot Appointment Demo")
+st.title("SmartCare Scheduler – AI Chatbot + Booking")
 
-st.write("👩‍⚕️ Welcome! Let's book your hospital appointment.")
-language = st.selectbox("Choose your language:", ["English", "Spanish", "Finnish"])
-appt_type = st.selectbox("Type of Appointment:", ["General consultation", "Follow-up", "Vaccination"])
+st.write("👩‍⚕️ Hello! I'm your AI assistant. I can help you book a hospital appointment.")
+
+openai_api_key = st.text_input("Enter your OpenAI API key", type="password")
+
+if openai_api_key:
+    openai.api_key = openai_api_key
+
+    user_prompt = st.text_area("Ask a question about your hospital visit or scheduling...")
+
+    if st.button("Send to AI"):
+        if user_prompt:
+            with st.spinner("Thinking..."):
+                try:
+                    response = openai.ChatCompletion.create(
+                        model="gpt-3.5-turbo",
+                        messages=[
+                            {"role": "system", "content": "You are a helpful healthcare assistant scheduling appointments."},
+                            {"role": "user", "content": user_prompt}
+                        ],
+                        max_tokens=150
+                    )
+                    reply = response['choices'][0]['message']['content']
+                    st.success(reply)
+                except Exception as e:
+                    st.error(f"API error: {str(e)}")
+
+# Booking interface
+st.header("Schedule Your Appointment")
 preferred_day = st.selectbox("Preferred Day:", ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"])
 preferred_time = st.radio("Preferred Time:", ["Morning", "Afternoon"])
 
@@ -22,4 +49,4 @@ if st.button("Check Available Slots"):
         else:
             st.warning("No available slots match your criteria.")
     else:
-        st.error("No slots available for that day yet.")
+        st.info("No slots available for that day yet.")
